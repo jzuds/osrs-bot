@@ -1,9 +1,7 @@
 FROM python:3.11-slim
 
-WORKDIR /osrs-bot
-
-COPY . /osrs-bot
-
-RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update \
+  && apt-get -y install tesseract-ocr \
+  && apt-get -y install ffmpeg libsm6 libxext6
 
 ENTRYPOINT ["/bin/bash"]

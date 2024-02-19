@@ -1,23 +1,10 @@
-# Makefile for python code
-# 
-# > make help
-#
-# The following commands can be used.
-#
-# init:  sets up environment and installs requirements
-# install:  Installs development requirments
-# format:  Formats the code with autopep8
-# lint:  Runs flake8 on src, exit if critical rules are broken
-# clean:  Remove build and cache files
-# env:  Source venv and environment files for testing
-# leave:  Cleanup and deactivate venv
-# test:  Run pytest
-# run:  Executes the logic
-
-VENV_PATH='env/bin/activate'
-ENVIRONMENT_VARIABLE_FILE='.env'
-DOCKER_NAME=osrs-bot
-DOCKER_TAG=latest
+PYEXEC := python
+BASH := bash
+setup := setup.py
+package := osrs_bot
+package_dir := src/osrs_bot
+tests_dir := tests
+PYTEST_COMMAND := $(PYEXEC) -m pytest --cov=. --cov-fail-under=90 --import-mode=importlib --cov-config=pyproject.toml --cov-report=xml:coverage.xml --cov-report=term-missing --cov-branch $(package_dir) $(tests_dir)
 
 define find.functions
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
@@ -28,53 +15,62 @@ help:
 	@echo ''
 	$(call find.functions)
 
+# .PHONY: all
+# all: ## Run lint checks and tests.
+# all: fix-lint lint test
 
-install: ## Installs development requirments
-install:
-	python -m pip install --upgrade pip
-	# Used for packaging and publishing
-	pip install setuptools wheel twine
-	# Used for linting
-	pip install flake8
-	# Used for testing
-	pip install pytest
+# .PHONY: format
+# format:
+# 	$(PYEXEC) -m ruff format --check $(package_dir)
+# 	$(PYEXEC) -m ruff format --check $(tests_dir)
 
-lint: ## Runs flake8 on src, exit if critical rules are broken
-lint:
-	# stop the build if there are Python syntax errors or undefined names
-	flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
-	# exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-	flake8 src --count --exit-zero --statistics
+# .PHONY: ruff-fix
+# ruff-fix: ## Fix code formatting using Ruff
+# ruff-fix: 
+# 	$(PYEXEC) -m ruff check --fix-only -e $(package_dir)
+# 	$(PYEXEC) -m ruff check --fix-only -e $(tests_dir)
 
-clean: ## Remove build and cache files
-clean:
-	rm -rf *.egg-info
-	rm -rf build
-	rm -rf dist
-	rm -rf .pytest_cache
-	# Remove all pycache
-	find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+# .PHONY: format-fix
+# format-fix: ## Format the source code with Black
+# format-fix: 
+# 	$(PYEXEC) -m ruff format -q $(package_dir)
+# 	$(PYEXEC) -m ruff format -q $(tests_dir)
 
-test: ## Run pytest
-test:
-	pytest . -p no:logging -p no:warnings
+# .PHONY: blocklint
+# blocklint: 
+# 	$(PYEXEC) -m mypy --config-file pyproject.toml $(package_dir)
 
-build: ## Build docker image
-build:
-	docker build -t $(DOCKER_NAME):$(DOCKER_TAG) -f Dockerfile .
+# .PHONY: mypy
+# mypy: 
+# 	$(PYEXEC) -m blocklint --max-issue-threshold 1 $(package_dir)
 
-create: ## Create docker image
-create: build
-	docker create -it --name $(DOCKER_NAME) $(DOCKER_NAME):$(DOCKER_TAG)
+# .PHONY: ruff
+# ruff: 
+# 	$(PYEXEC) -m ruff check $(package_dir)
+# 	$(PYEXEC) -m ruff check $(tests_dir)
 
-start: ## Build and start docker image
-start: build
-	docker start $(DOCKER_NAME)
+# .PHONY: lint
+# lint: ## Run lint checks.
+# lint: ruff mypy format blocklint
 
-run: ## build, start and run docker image
-run: start
-	docker run -it $(DOCKER_NAME):$(DOCKER_TAG)
+# .PHONY: fix-lint
+# fix-lint:  ## Fix any lint errors that can be fixed automatically.
+# fix-lint: ruff-fix format-fix
 
-exec: ## build, start and exec into docker image
-exec: start
-	docker exec -it $(DOCKER_NAME) bash
+# .PHONY: test
+# test: ## run all tests.
+# test:
+# 	$(PYTEST_COMMAND)
+
+.PHONY: rebuild-docker
+rebuild-docker: ## rebuilds docker file suing the lastest build image.
+	docker-compose build --pull
+
+.PHONY: clean-docker
+clean-docker: ## cleans up docker volumes and rebuilds image from scratch.
+	docker-compose down -v
+	docker-compose build --pull
+
+.PHONY: dev-shell
+dev-shell: ## runs docker container
+	docker-compose run --rm app
