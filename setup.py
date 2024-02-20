@@ -1,4 +1,3 @@
-import os
 import re
 from pathlib import Path
 
@@ -26,14 +25,14 @@ setup(
     description="osrs bot for educational purposes with image and text processing.",
     author="jzuds",
     author_email="zudsgaming@gmail.com",
-    python_requires=">=3.11",
+    python_requires=">=3.8",
     include_package_data=True,
     package_dir={"": "src"},
     packages=find_namespace_packages(where="src"),
     install_requires=get_requirements(REQUIREMENTS_FILE),
     entry_points={
         "console_scripts": [
-            "start_bot = osrs_bot.main:main",
+            "start-basic-osrs-bot = osrs_bot.main:main",
         ]
     },
     zip_safe=False,

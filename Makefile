@@ -19,16 +19,3 @@ help:
 test: ## run all tests.
 test:
 	$(PYTEST_COMMAND)
-
-.PHONY: rebuild-docker
-rebuild-docker: ## rebuilds docker file suing the lastest build image.
-	docker-compose build --pull
-
-.PHONY: clean-docker
-clean-docker: ## cleans up docker volumes and rebuilds image from scratch.
-	docker-compose down -v
-	docker-compose build --pull
-
-.PHONY: dev-shell
-dev-shell: ## runs docker container
-	docker-compose run --rm app
