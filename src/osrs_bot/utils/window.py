@@ -65,7 +65,16 @@ def screenshot_window(
 
 
 def main() -> None:
-    """cli function that runs windows capture."""
+    """cli function that runs windows capture.
+    exmaple:
+
+    start-win-capture `
+        --name=Runelite `
+        --capt-dir=D:\ImageTraining\osrs-bot `
+        --sub-dir=al-kharid-cooking `
+        --sleep=2 `
+        --max-elapsed-time=60
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--name",
