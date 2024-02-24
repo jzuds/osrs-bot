@@ -1,6 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import simplejson
-import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -10,7 +9,6 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.FileHandler(LOGFILE), logging.StreamHandler()],
 )
-# http://127.0.0.1:80/
 
 
 class S(BaseHTTPRequestHandler):

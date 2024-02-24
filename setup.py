@@ -33,6 +33,7 @@ setup(
     entry_points={
         "console_scripts": [
             "start-basic-osrs-bot = osrs_bot.main:main",
+            "start-win-capture = osrs_bot.utils.window:main"
         ]
     },
     zip_safe=False,

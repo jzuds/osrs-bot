@@ -1,8 +1,7 @@
 #Development
 black
 
-#Project Requirements
+#Project
 pillow
 pyautogui
-win32api
-win32gui
+pywin32

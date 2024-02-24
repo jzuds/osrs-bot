@@ -1,8 +1,7 @@
 """module used for window capture and tracking."""
 
 import argparse
-import pyautogui
-import win32api
+import time
 import win32gui
 
 from datetime import datetime
@@ -12,25 +11,7 @@ from typing import Optional, Tuple
 
 from osrs_bot.utils.generic import is_valid_path
 
-
 DEFAULT_IMAGE_DIR = "D:\\ImageTraining\\osrs-bot"
-
-
-def setup_args() -> argparse.ArgumentParser:
-    """
-    Method to setup function arguments for the main function.
-
-    Returns:
-        argparse.ArgumentParser: Argument parser object.
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "capt_dir",
-        help="the directory where the images are captured",
-        default=DEFAULT_IMAGE_DIR,
-        type=is_valid_path,
-    )
-    return parser
 
 
 def get_named_window(name: str) -> Optional[Tuple[int]]:
@@ -64,7 +45,7 @@ def screenshot_window(
     Args:
         coords (Tuple[int, int, int, int]): Coordinates of the window to screenshot (left, top, right, bottom).
         save_dir (str): Directory where the screenshot will be saved.
-        sub_dir (str, optional): Subdirectory within save_dir. Defaults to "osrs".
+        sub_dir (str, optional): Subdirectory within save_dir. Defaults to None.
     """
     # Generate timestamp
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -81,3 +62,36 @@ def screenshot_window(
 
     # Save screenshot
     screenshot.save(directory.joinpath(f"{timestamp}.png"))
+
+
+def main() -> None:
+    """cli function that runs windows capture."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--name",
+        help="name of the window to capture.",
+        default="Runelite",
+        type=str,
+    )
+    parser.add_argument(
+        "--capt-dir",
+        help="the directory where the images are captured",
+        default=DEFAULT_IMAGE_DIR,
+        type=is_valid_path,
+    )
+    parser.add_argument(
+        "--sub-dir", help="sub-dir to store images in.", type=str, required=False
+    )
+    parser.add_argument(
+        "--sleep",
+        help="amount of time in seconds to sleep between captures",
+        default=5,
+        type=int,
+    )
+    args = parser.parse_args(namespace=None)
+
+    while True:
+        window = get_named_window(name="RuneLite")
+        assert window is not None
+        screenshot_window(coords=window, save_dir=args.capt_dir, sub_dir=args.sub_dir)
+        time.sleep(args.sleep)
