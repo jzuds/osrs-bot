@@ -88,10 +88,22 @@ def main() -> None:
         default=5,
         type=int,
     )
+    parser.add_argument(
+        "--max-elapsed-time",
+        help="max-allowed-time in seconds for image capture",
+        default=None,
+        type=int,
+    )
     args = parser.parse_args(namespace=None)
 
-    while True:
-        window = get_named_window(name="RuneLite")
-        assert window is not None
-        screenshot_window(coords=window, save_dir=args.capt_dir, sub_dir=args.sub_dir)
-        time.sleep(args.sleep)
+    start_time = time.time()
+    try:
+        while True:
+            if isinstance(args.max_elapsed_time, int) and time.time() - start_time >= args.max_elapsed_time:
+                break
+            window = get_named_window(name=args.name)
+            assert window is not None
+            screenshot_window(coords=window, save_dir=args.capt_dir, sub_dir=args.sub_dir)
+            time.sleep(args.sleep)
+    except KeyboardInterrupt:
+        pass
